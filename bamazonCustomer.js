@@ -61,8 +61,9 @@ function customerBid() {
                 //console.log(answers);
                 if (res[answers.id-1].stock_quantity > answers.quantity) {
                     var order = answers;
-                    var stockQuantity = res[answers.id-1].stock_quantity - answers.quantity;
-                    placeOrder(order, stockQuantity);
+                    var unitCost = res[answers.id-1].price;
+                    var stockQuantity = res[answers.id-1].stock_quantity;
+                    placeOrder(order, stockQuantity, unitCost);
                 } else {
                     console.log("Sorry, We don't have enough left!");
                     connection.end();
@@ -75,13 +76,13 @@ function customerBid() {
     
 }
 
-function placeOrder(order,stockQuantity) {
+function placeOrder(order,stockQuantity, unitCost) {
     console.log("Placing the order for you ...\n")
     connection.query(
         "UPDATE products SET ? WHERE ?",
         [
             {
-              stock_quantity: stockQuantity
+              stock_quantity: stockQuantity - order.quantity
             },
             {
               item_id: order.id
@@ -89,7 +90,11 @@ function placeOrder(order,stockQuantity) {
         ],
         function(err,res) {
             if (err) throw err;
+            // console.log(typeof unitCost);
+            // console.log(typeof order.quantity);
+            var totalCost = parseInt(order.quantity) * unitCost;
             console.log("You have sucessfully placed the order");
+            console.log("The total cost will be: $" + totalCost+ "!");
             connection.end();
         }
     )
