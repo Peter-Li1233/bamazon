@@ -63,7 +63,8 @@ function customerBid() {
                     var order = answers;
                     var unitCost = res[answers.id-1].price;
                     var stockQuantity = res[answers.id-1].stock_quantity;
-                    placeOrder(order, stockQuantity, unitCost);
+                    var productSales = res[answers.id-1].product_sales;
+                    placeOrder(order, stockQuantity, unitCost, productSales);
                 } else {
                     console.log("Sorry, We don't have enough left!");
                     connection.end();
@@ -76,13 +77,14 @@ function customerBid() {
     
 }
 
-function placeOrder(order,stockQuantity, unitCost) {
+function placeOrder(order,stockQuantity, unitCost, productSales) {
     console.log("Placing the order for you ...\n")
     connection.query(
         "UPDATE products SET ? WHERE ?",
         [
             {
-              stock_quantity: stockQuantity - order.quantity
+              stock_quantity: stockQuantity - order.quantity,
+              product_sales: parseInt(order.quantity) * unitCost + productSales
             },
             {
               item_id: order.id
